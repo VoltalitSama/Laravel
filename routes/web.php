@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use \Illuminate\Http\Request;
+use App\Http\Controllers\ToolController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,3 +72,36 @@ Route::get('/ip',function(){
     ->middleware(\App\Http\Middleware\WhiteList::class)
     ->name("IP");
 
+
+//Exercice Unique MVC
+/*
+Route::get('/tools',function(){
+    $tools = [
+        (object) [
+            "name" => "Marteau",
+            "description" => "pour frapper et enfoncer des clous dans du bois ou d'autres matériaux.",
+            "price" => "23.99",
+        ],
+        (object) [
+            "name" => "Tournevis",
+            "description" => "pour serrer ou desserrer les vis.",
+            "price" => "15.99",
+        ],
+        (object) [
+            "name" => "Scie",
+            "description" => "pour couper le bois, le métal ou d'autres matériaux.",
+            "price" => "56.33",
+        ],
+    ];
+    dd($tools);
+})
+    ->name("tools");
+*/
+
+//Route::get('/tools', [ToolController::class, 'index'])->name("tools");
+
+//Route::get('/tools/{id}', [ToolController::class, 'show'])->name("tools");
+
+Route::resource('tools', ToolController::class)->only([
+    'index', 'show'
+]);
