@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\SearchInvoice;
 use Illuminate\Support\Facades\Route;
 use \Illuminate\Http\Request;
 use App\Http\Controllers\ToolController;
@@ -121,5 +123,12 @@ Route::resource('invoices', InvoiceController::class)->only([
     'index', 'show', 'create'
 ]);
 
+//TD4
+/*Route::get('/search', function (Request $request){
+    return view('searchs/search');
+})
+    ->name("search");*/
 
-
+Route::controller(SearchInvoice::class)->group(function () {
+    Route::get('/search', 'search')->name('search');
+});
