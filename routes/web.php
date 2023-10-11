@@ -111,7 +111,7 @@ Route::resource('tools', ToolController::class)->only([
 
 Route::controller(InvoiceController::class)->prefix('invoices')->as('invoices')->group(function () {
     Route::get('invoices/create50', 'create50')->name('invoices.create50');
-    Route::get('create50', [InvoiceController::class, 'create50'])->name('create50');
+    Route::get('createData', [InvoiceController::class, 'createData'])->name('createData');
     Route::get('invoices/create50', [InvoiceController::class, 'create50'])->name('invoices.create50');
     Route::get('invoices/create50', [InvoiceController::class, 'create50'])->name('invoices.create50');
     Route::get('invoices/create50', [InvoiceController::class, 'create50'])->name('invoices.create50');

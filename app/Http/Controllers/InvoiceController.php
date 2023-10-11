@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\Invoice;
+use App\Models\Tool;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Schema;
@@ -16,8 +18,6 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
-        $this->create50();
-
         $order = $request->query('order', 'asc');
         if($order != 'asc' && $order != 'desc') {
             abort(403, "Mauvais paramètre");
@@ -98,26 +98,36 @@ class InvoiceController extends Controller
         //
     }
 
-    public function create50()
+    public function createData()
     {
-        $invoices = Invoice::query();
-
-        // Vide la table
-        $invoices->truncate();
-
-        //$invoice = new Invoice();
-        //$invoice->client_id = 2;
-        //$invoice->save();
-
+        $clients = Client::query();
+        $clients->truncate();
         // Crée les données
-        for ($i = 1; $i <= 50; $i++) {
-            $invoices->create([
-                'client_id' => $i,
-                'purchase_order_id' => $i,
-                'total_amount' => $i * 1.1,
-                'amount_before_tax' => $i,
-                'tax' => 10,
+        for ($i = 1; $i <= 3; $i++) {
+            $client = Client::create([
+                'email' => 'compte' . $i . '@mail.fr',
+                'address' => 'rue' . $i,
             ]);
+            $tools = [];
+            for ($p = 1; $p <= 3; $p++) {
+                $tool = Tool::create([
+                    'name' => 'tool' . $i . $p,
+                    'description' => 'tool numero' . $i . $p,
+                    'price' => $i * $p * 1.1,
+                ]);
+                $tools[] = $tool->id;
+            }
+            for ($j = 1; $j <= 2; $j++) {
+                $invoice = Invoice::create([
+                    'client_id' => $client->id,
+                    'purchase_order_id' => $j,
+                    'total_amount' => $j * 1.1,
+                    'amount_before_tax' => $j,
+                    'tax' => 10,
+                ]);
+                foreach ($tools as $tool)
+                    $invoice->tools()->attach($tool, ['quantity' => 2]);
+            }
         }
     }
 }

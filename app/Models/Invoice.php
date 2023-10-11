@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Invoice extends Model
 {
@@ -16,4 +18,24 @@ class Invoice extends Model
         'send_at',
         'acquitted_at'
     ];
+
+    /**
+     * A Invoice is related to a Client
+     *
+     * @return BelongsTo
+     */
+    public function client():BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    /**
+     * A Invoice can have many tools
+     *
+     * @return BelongsToMany
+     */
+    public function tools():BelongsToMany
+    {
+        return $this->belongsToMany(Tool::class)->withTimestamps();
+    }
 }
