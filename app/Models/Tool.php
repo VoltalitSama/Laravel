@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -13,6 +14,12 @@ class Tool extends Model
         'name',
         'description',
         'price'
+    ];
+
+    protected $casts = [
+        'name' => 'string',
+        'description' => 'string',
+        'price' => MoneyCast::class
     ];
     /**
      * A Tool can be in many Invoices
