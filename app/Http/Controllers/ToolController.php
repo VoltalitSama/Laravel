@@ -34,7 +34,7 @@ class ToolController extends Controller
             ],
         ];*/
         $tools = Tool::all();
-        //dd($tools);
+        dd($tools);
 
         return view('tools/index', compact('tools'));
     }
@@ -68,7 +68,7 @@ class ToolController extends Controller
      */
     public function show(Tool $tool)
     {
-        //dd($post);
+        dd($tool->price);
 
         return view('tools/show', [
             'tool' => $tool

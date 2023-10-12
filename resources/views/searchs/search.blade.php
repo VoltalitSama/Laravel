@@ -99,7 +99,7 @@
                                             {{ $invoice->client->email }}
                                         </td>
                                         <td class="border-t-0 px-6 align-center border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                                            {{ $invoice->total_amount }} €
+                                            {{ $invoice->my_total_amount }} €
                                         </td>
                                         <td class="border-t-0 px-6 align-center border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                                             {{ $invoice->tools_count }}

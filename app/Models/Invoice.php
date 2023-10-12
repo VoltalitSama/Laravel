@@ -36,6 +36,6 @@ class Invoice extends Model
      */
     public function tools():BelongsToMany
     {
-        return $this->belongsToMany(Tool::class)->withTimestamps();
+        return $this->belongsToMany(Tool::class)->withPivot('quantity');
     }
 }

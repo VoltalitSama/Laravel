@@ -109,6 +109,18 @@ Route::resource('tools', ToolController::class)->only([
     'index', 'show'
 ]);
 
+Route::get('/toolsedit', function () {
+    $tools = \App\Models\Tool::all();
+
+    foreach ($tools as $tool) {
+        $tool->update(['price' => json_encode([
+            'price' => $tool->price,
+            'currency' => 'EUR',
+            'currency_rate' => rand(0, 100) / 100,
+        ])]);
+    }
+});
+
 Route::controller(InvoiceController::class)->prefix('invoices')->as('invoices')->group(function () {
     Route::get('invoices/create50', 'create50')->name('invoices.create50');
     Route::get('createData', [InvoiceController::class, 'createData'])->name('createData');
