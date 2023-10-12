@@ -30,4 +30,8 @@ class Tool extends Model
     {
         return $this->belongsToMany(Invoice::class)->withTimestamps();
     }
+
+    public function scopeWherePriceGreaterThan(Builder $query, $price) {
+        $query->where('price->price', '>', $price);
+    }
 }
