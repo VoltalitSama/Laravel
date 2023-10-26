@@ -3,6 +3,8 @@
 namespace App\Helpers;
 
 use App\Casts\Json;
+use App\Services\RateService;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use \InvalidArgumentException;
 use Illuminate\Contracts\Support\Arrayable;
 use \Stringable;
@@ -16,7 +18,7 @@ class Money implements Arrayable, Stringable
     public function __construct(
         private readonly string $currency,
         private readonly float $price,
-        float $currency_rate = null,
+        float $currency_rate = null
     )
     {
         if (! $this->currencyExists($currency)) {
