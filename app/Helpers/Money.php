@@ -11,6 +11,8 @@ class Money implements Arrayable, Stringable
 {
     private readonly float $currency_rate;
 
+    private RateService $rateService;
+
     public function __construct(
         private readonly string $currency,
         private readonly float $price,
@@ -21,7 +23,13 @@ class Money implements Arrayable, Stringable
             throw new InvalidArgumentException('The currency doesn\'t exist');
         }
 
-        $this->currency_rate = $currency_rate ?? $this->getCurrencyRate($this->currency);
+        try {
+            $rateService = app()->make(RateService::class);
+
+            $this->currency_rate = $currency_rate ?? $this->getCurrencyRate($this->currency);
+        } catch (BindingResolutionException $e) {
+            throw $e;
+        }
     }
 
     private static function currencyExists($currency)
@@ -29,9 +37,10 @@ class Money implements Arrayable, Stringable
         return str($currency)->length() === 3;
     }
 
-    private static function getCurrencyRate($currency)
+    private function getCurrencyRate($currency)
     {
-        return crc32($currency) / 10_000_000_000;
+        //return crc32($currency) / 10_000_000_000;
+        return $this->rateService->getRateFromCurrency($currency);
     }
 
     public static function fromEuros(float $price)

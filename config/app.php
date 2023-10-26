@@ -195,6 +195,9 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        // Inscription du provider
+        App\Providers\RateServiceProvider::class,
+
     ],
 
     /*
