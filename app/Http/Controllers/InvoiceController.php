@@ -2,132 +2,135 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Tool;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Blade;
 
 class InvoiceController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Invoice::class);
+    }
+
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
-        $order = $request->query('order', 'asc');
-        if($order != 'asc' && $order != 'desc') {
-            abort(403, "Mauvais paramètre");
-        }
+        $invoices = Invoice::with('tools')->get();
 
-        $invoices = Invoice::query()
-            ->orderBy('total_amount', $order)
-            ->simplePaginate(10);
-
-        return view('invoices/index', compact('invoices'));
+        return Blade::render('
+            <h1>Factures</h1>
+            <ul>
+                @foreach ($invoices as $invoice)
+                    <li>Facture #{{ $invoice->id }} : {{ $invoice->total_amount }}€</li>
+                @endforeach
+            </ul>
+            ', compact('invoices'));
     }
 
     /**
      * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function create()
     {
-
+        return Blade::render('
+            <h1>Créer une facture</h1>
+            <form action="{{ route(\'invoices.store\') }}" method="POST">
+                @csrf
+                <input type="number" name="number_of_items">
+                <input type="submit" value="Créer">
+            </form>
+        ');
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'number_of_items' => 'required|integer|min:1|max:10'
+        ]);
+
+        $items = [];
+
+        for ($i = 0; $i < $data['number_of_items']; $i++) {
+            $items[] = Tool::query()->inRandomOrder()->first();
+        }
+
+        $amount_before_tax = array_reduce($items, function ($carry, $item) {
+            return $carry + $item->price->toArray()['price'];
+        }, 0);
+
+        $tax = $amount_before_tax * 0.2;
+
+        $invoice = Invoice::query()->create([
+            'client_id' => auth()->id(),
+            'purchase_order_id' => rand(1, 1000000),
+            'total_amount' => $amount_before_tax + $tax,
+            'amount_before_tax' => $amount_before_tax,
+            'tax' => $tax,
+            'send_at' => now(),
+        ]);
+
+        collect($items)->groupBy('id')->each(function ($item) use ($invoice) {
+            $invoice->tools()->attach($item->first()->id, ['quantity' => $item->count()]);
+        });
+
+        return to_route('invoices.show', $invoice->id);
     }
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function show(Invoice $invoice)
     {
-        return view('invoices/show', [
-            'invoice' => $invoice
-        ]);
-    }
+        $invoice->load('tools');
+        $invoice->tools()->withPivot('quantity');
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
+        return Blade::render('
+            <h1>Facture #{{ $invoice->id }}</h1>
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
+            @foreach ($invoice->tools as $tool)
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nom du produit</th>
+                      <th>Quantité</th>
+                      <th>Prix unitaire</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{{ $tool->name }}</td>
+                      <td>{{ $tool->pivot->quantity }}</td>
+                      <td>{{ $tool->price->toArray()[\'price\'] }}€</td>
+                    </tr>
+                  </tbody>
+                </table>
+            @endforeach
+
+            @can(\'delete\', $invoice)
+
+            <form action="{{ route(\'invoices.destroy\', $invoice->id) }}" method="POST">
+                @csrf
+                @method(\'DELETE\')
+                <input type="submit" value="Supprimer">
+            </form>
+            @endcan
+        ', compact('invoice'));
     }
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Invoice $invoice)
     {
-        //
-    }
+        $invoice->delete();
 
-    public function createData()
-    {
-        $clients = Client::query();
-        $clients->truncate();
-        // Crée les données
-        for ($i = 1; $i <= 3; $i++) {
-            $client = Client::create([
-                'email' => 'compte' . $i . '@mail.fr',
-                'address' => 'rue' . $i,
-            ]);
-            $tools = [];
-            for ($p = 1; $p <= 3; $p++) {
-                $tool = Tool::create([
-                    'name' => 'tool' . $i . $p,
-                    'description' => 'tool numero' . $i . $p,
-                    'price' => $i * $p * 1.1,
-                ]);
-                $tools[] = $tool->id;
-            }
-            for ($j = 1; $j <= 2; $j++) {
-                $invoice = Invoice::create([
-                    'client_id' => $client->id,
-                    'purchase_order_id' => $j,
-                    'total_amount' => $j * 1.1,
-                    'amount_before_tax' => $j,
-                    'tax' => 10,
-                ]);
-                foreach ($tools as $tool)
-                    $invoice->tools()->attach($tool, ['quantity' => 2]);
-            }
-        }
+        return to_route('invoices.index');
     }
 }

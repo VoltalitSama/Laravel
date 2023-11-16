@@ -19,7 +19,6 @@ use App\Http\Controllers\ToolController;
 */
 
 
-
 //Exercice 1
 Route::get('/request', function (Request $request) {
     dd($request);
@@ -132,8 +131,8 @@ Route::controller(InvoiceController::class)->prefix('invoices')->as('invoices')-
 
 //TD3
 Route::resource('invoices', InvoiceController::class)->only([
-    'index', 'show', 'create'
-]);
+    'index', 'show', 'create', 'store', 'destroy'
+])->middleware('auth');
 
 //TD4
 /*Route::get('/search', function (Request $request){
