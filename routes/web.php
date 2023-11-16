@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\SearchInvoice;
@@ -123,10 +124,7 @@ Route::get('/toolsedit', function () {
 Route::controller(InvoiceController::class)->prefix('invoices')->as('invoices')->group(function () {
     Route::get('invoices/create50', 'create50')->name('invoices.create50');
     Route::get('createData', [InvoiceController::class, 'createData'])->name('createData');
-    Route::get('invoices/create50', [InvoiceController::class, 'create50'])->name('invoices.create50');
-    Route::get('invoices/create50', [InvoiceController::class, 'create50'])->name('invoices.create50');
-    Route::get('invoices/create50', [InvoiceController::class, 'create50'])->name('invoices.create50');
-    Route::get('invoices/create50', [InvoiceController::class, 'create50'])->name('invoices.create50');
+
 });
 
 //TD3
@@ -143,3 +141,23 @@ Route::resource('invoices', InvoiceController::class)->only([
 Route::controller(SearchInvoice::class)->group(function () {
     Route::get('/search', 'search')->name('search');
 });
+
+//TD Authentification
+Route::controller(AuthenticationController::class)->prefix('auth')->as('auth.')->group(function (){
+    Route::get('login', [AuthenticationController::class, 'showForm'])
+        ->middleware('guest')
+        ->name('login');
+    Route::post('login', [AuthenticationController::class, 'login'])
+        ->middleware('guest');
+    Route::get('callback', [AuthenticationController::class, 'callback'])
+        ->middleware('guest')
+        ->name('authentication.callback');
+    Route::get('logout', [AuthenticationController::class, 'logout'])
+        ->middleware('auth')
+        ->name('logout');
+});
+
+//Authentication
+Route::get('/home', \App\Http\Controllers\HomeController::class)
+    ->middleware('auth')
+    ->name('home');
