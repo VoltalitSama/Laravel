@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Enums\Roles;
+use App\Events\CreatedUser;
 use App\Models\User;
 use Illuminate\Console\Command;
 
@@ -27,7 +28,7 @@ class CreateUser extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle() : int
     {
         $name = $this->argument('nom');
         $email = $this->argument('email');
@@ -61,15 +62,19 @@ class CreateUser extends Command
             }
         }
 
-        $user = User::query()->create([
+       /* $user = User::query()->create([
                 'name' => $name,
                 'email' => $email,
                 'role' => $role
             ]);
+        */
 
-        $user->sendAuthenticationMail();
+        CreatedUser::dispatch($email, $name, $role->value);
+
+        //$user->sendAuthenticationMail();
 
         $this->line("Utilisateur créé !");
+
         return Command::SUCCESS;
     }
 }

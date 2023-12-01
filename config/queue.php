@@ -31,8 +31,7 @@ return [
     'connections' => [
 
         'sync' => [
-            'driver' => 'sync',
-            'queue' => 'file_processing'
+            'driver' => 'sync'
         ],
 
         'database' => [
